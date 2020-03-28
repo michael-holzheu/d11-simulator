@@ -47,6 +47,14 @@ struct connector connectors[] = {
 	{&d11.low[14],&d11.counters[4].d[9]},
 	{&d11.low[15],&d11.counters[4].d[10]},
 	{&d11.low[16],&d11.counters[4].d[11]},
+	/* Gruppen Kontrolle: Untere buersten */
+	{&d11.low[1],&d11.nach_untere_buersten[18]},
+	{&d11.low[2],&d11.nach_untere_buersten[19]},
+	{&d11.low[3],&d11.nach_untere_buersten[20]},
+	/* Gruppen Kontrolle: Obere buersten */
+	{&d11.high[1],&d11.nach_obere_buersten[18]},
+	{&d11.high[2],&d11.nach_obere_buersten[19]},
+	{&d11.high[3],&d11.nach_obere_buersten[20]},
 };
 
 int cards[][80] = {

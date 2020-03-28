@@ -25,6 +25,8 @@ struct d11 {
 	struct counter printers[COUNTER_COUNT + 1];
 	int low[81];
 	int high[81];
+	int nach_obere_buersten[21];
+	int nach_untere_buersten[21];
 } d11;
 
 struct connector {
