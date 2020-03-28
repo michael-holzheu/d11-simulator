@@ -10,6 +10,30 @@
 #ifndef EXAMPLE_H
 #define EXAMPLE_H
 
-void libd11_test(void);
+struct counter {
+	int d[12];
+};
+
+#define PRINTER_COUNT 8
+#define COUNTER_COUNT 8
+
+/*
+ * D11 state
+ */
+struct d11 {
+	struct counter counters[PRINTER_COUNT + 1];
+	struct counter printers[COUNTER_COUNT + 1];
+	int low[81];
+	int high[81];
+} d11;
+
+struct connector {
+	int *source;
+	int *target;
+};
+
+
+void d11_init(int argc, char *argv[]);
+void d11_run(int cards[][80], int card_count, struct connector *connectors, int con_count);
 
 #endif /* EXAMPLE_H */

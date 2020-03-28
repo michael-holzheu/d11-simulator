@@ -12,13 +12,52 @@
 #include "lib/d11.h"
 #include "lib/util_base.h"
 
-#include "opts.h"
+struct connector connectors[] = {
+	/* Artikel 1-3 */
+	{&d11.low[1],&d11.printers[6].d[9]},
+	{&d11.low[2],&d11.printers[6].d[10]},
+	{&d11.low[3],&d11.printers[6].d[11]},
+	/* Menge 4-9 */
+	{&d11.low[4],&d11.printers[5].d[6]},
+	{&d11.low[5],&d11.printers[5].d[7]},
+	{&d11.low[6],&d11.printers[5].d[8]},
+	{&d11.low[7],&d11.printers[5].d[9]},
+	{&d11.low[8],&d11.printers[5].d[10]},
+	{&d11.low[9],&d11.printers[5].d[11]},
+	/* Menge 4-9 */
+	{&d11.low[4],&d11.counters[5].d[6]},
+	{&d11.low[5],&d11.counters[5].d[7]},
+	{&d11.low[6],&d11.counters[5].d[8]},
+	{&d11.low[7],&d11.counters[5].d[9]},
+	{&d11.low[8],&d11.counters[5].d[10]},
+	{&d11.low[9],&d11.counters[5].d[11]},
+	/* Wert 10-16 */
+	{&d11.low[10],&d11.printers[4].d[5]},
+	{&d11.low[11],&d11.printers[4].d[6]},
+	{&d11.low[12],&d11.printers[4].d[7]},
+	{&d11.low[13],&d11.printers[4].d[8]},
+	{&d11.low[14],&d11.printers[4].d[9]},
+	{&d11.low[15],&d11.printers[4].d[10]},
+	{&d11.low[16],&d11.printers[4].d[11]},
+	/* Wert 10-16 */
+	{&d11.low[10],&d11.counters[4].d[5]},
+	{&d11.low[11],&d11.counters[4].d[6]},
+	{&d11.low[12],&d11.counters[4].d[7]},
+	{&d11.low[13],&d11.counters[4].d[8]},
+	{&d11.low[14],&d11.counters[4].d[9]},
+	{&d11.low[15],&d11.counters[4].d[10]},
+	{&d11.low[16],&d11.counters[4].d[11]},
+};
+
+int cards[][80] = {
+	{1,0,1, 0,0,0,0,2,5, 0,0,0,5,0,0,0,},
+	{1,0,1, 0,0,0,0,5,0, 0,0,1,0,0,0,0,},
+	{1,0,1, 0,0,0,0,3,6, 0,0,0,7,2,0,0,},
+};
 
 int main(int argc, char *argv[])
 {
-	opts_parse(argc, argv);
-	printf("bool: %d\n", opts.bool_test);
-	printf("int.: %d\n", opts.int_test);
-	libd11_test();
+	d11_init(argc, argv);
+	d11_run(cards, UTIL_ARRAY_SIZE(cards), connectors, UTIL_ARRAY_SIZE(connectors));
 	return 0;
 }

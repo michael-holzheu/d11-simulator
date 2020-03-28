@@ -18,12 +18,9 @@
  * Options
  */
 struct opts {
-	int int_test;		/* For testing integer options */
-	bool bool_test;		/* For testing boolean options */
+	bool debug;		/* debug mode */
 };
 
 extern struct opts opts;
-
-void opts_parse(int argc, char *argv[]);
 
 #endif /* OPTS_H */

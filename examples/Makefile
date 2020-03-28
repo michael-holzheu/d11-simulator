@@ -10,7 +10,7 @@ libs =	\
 	$(rootdir)/libd11/libd11.a \
 	$(rootdir)/libutil/libutil.a
 
-example: example.o opts.o $(libs)
+example: example.o $(libs)
 
 install: all
 

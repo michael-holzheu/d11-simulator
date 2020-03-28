@@ -4,7 +4,7 @@ lib = libd11.a
 
 all: $(lib)
 
-objects = d11.o
+objects = d11.o opts.o
 
 $(lib): $(objects)
 
