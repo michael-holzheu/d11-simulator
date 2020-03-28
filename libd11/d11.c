@@ -11,6 +11,14 @@
 
 #include <stdio.h>
 
+/*
+ * State
+ */
+
+struct d11 {
+	int counter[8];
+};
+
 void libd11_test(void)
 {
 	printf("Invocation: Example library\n");
