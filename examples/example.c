@@ -55,6 +55,20 @@ struct connector connectors[] = {
 	{&d11.high[1],&d11.nach_obere_buersten[18]},
 	{&d11.high[2],&d11.nach_obere_buersten[19]},
 	{&d11.high[3],&d11.nach_obere_buersten[20]},
+	/* Gruppen Kontrolle: Abriegelung */
+	{&d11.abriegelung[18],&d11.gruppe.u},
+};
+
+/*
+ * Kommandobruecke
+ */
+struct connector connectors_kommando[] = {
+	/* Summenschreibung */
+	{&d11.kb.zwischengang[2],&d11.kb.summenschreibung[4]},
+	{&d11.kb.zwischengang[2],&d11.kb.summenschreibung[5]},
+	/* Summenloeschung */
+	{&d11.kb.zwischengang[1],&d11.kb.summenloeschung[4]},
+	{&d11.kb.zwischengang[1],&d11.kb.summenloeschung[5]},
 };
 
 int cards[][80] = {
@@ -72,6 +86,7 @@ int cards[][80] = {
 int main(int argc, char *argv[])
 {
 	d11_init(argc, argv);
-	d11_run(cards, UTIL_ARRAY_SIZE(cards), connectors, UTIL_ARRAY_SIZE(connectors));
+	d11_run(cards, UTIL_ARRAY_SIZE(cards), connectors, UTIL_ARRAY_SIZE(connectors),
+		connectors_kommando, UTIL_ARRAY_SIZE(connectors_kommando));
 	return 0;
 }

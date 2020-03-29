@@ -23,10 +23,21 @@ struct counter {
 struct d11 {
 	struct counter counters[PRINTER_COUNT + 1];
 	struct counter printers[COUNTER_COUNT + 1];
-	int low[81];
-	int high[81];
-	int nach_obere_buersten[21];
-	int nach_untere_buersten[21];
+	int low[80 + 1];
+	int high[80 + 1];
+	int nach_obere_buersten[20 + 1];
+	int nach_untere_buersten[20 + 1];
+	int abriegelung[20 + 1];
+	struct {
+		int u;
+		int h;
+		int ue;
+	} gruppe;
+	struct {
+		int zwischengang[8 + 1];
+		int summenschreibung[7 + 1];
+		int summenloeschung[7 + 1];
+	} kb;
 } d11;
 
 struct connector {
@@ -36,6 +47,7 @@ struct connector {
 
 
 void d11_init(int argc, char *argv[]);
-void d11_run(int cards[][80], int card_count, struct connector *connectors, int con_count);
+void d11_run(int cards[][80], int card_count, struct connector *connectors, int con_count,
+	     struct connector *connectors_kommando, int con_count_kommando);
 
 #endif /* EXAMPLE_H */
