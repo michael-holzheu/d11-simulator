@@ -69,6 +69,10 @@ struct connector connectors_kommando[] = {
 	/* Summenloeschung */
 	{&d11.kb.zwischengang[1],&d11.kb.summenloeschung[4]},
 	{&d11.kb.zwischengang[1],&d11.kb.summenloeschung[5]},
+	/* Postenschreibung */
+	{&d11.kb.ep,&d11.kb.postenschreibung[4]},
+	{&d11.kb.ep,&d11.kb.postenschreibung[5]},
+	{&d11.kb.ep,&d11.kb.postenschreibung[6]},
 };
 
 int cards[][80] = {

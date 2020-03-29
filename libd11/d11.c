@@ -60,6 +60,17 @@ static struct connector *connector_find_source_next(void *start, void *end)
 	return min;
 }
 
+static void do_connectors_kommando(void)
+{
+	int i;
+
+	for (i = 0; i < l.count_kommando; i++) {
+		int *source = l.connectors_kommando[i].source;
+		int *target = l.connectors_kommando[i].target;
+		*target = *source + *target;
+	}
+}
+
 static void zwischen_gang(void)
 {
 	char line[256], *ptr;
@@ -72,11 +83,7 @@ static void zwischen_gang(void)
 		memset(&d11.kb, 0, sizeof(d11.kb));
 		d11.kb.zwischengang[i] = 1;
 		/* Process connectors */
-		for (j = 0; j < l.count_kommando; j++) {
-			int *source = l.connectors_kommando[j].source;
-			int *target = l.connectors_kommando[j].target;
-			*target = *source + *target;
-		}
+		do_connectors_kommando();
 		/* Summenschreibung */
 		memset(line, 0, sizeof(line));
 		printed = false;
@@ -86,8 +93,6 @@ static void zwischen_gang(void)
 				if (d11.kb.summenschreibung[j]) {
 					printed = true;
 					sprintf(ptr++, "%x", d11.counters[j].d[k]);
-					if (opts.debug)
-						printf("%d:%d %x\n", j,k, d11.counters[j].d[k]);
 				} else {
 					sprintf(ptr++, " ");
 				}
@@ -103,11 +108,11 @@ static void zwischen_gang(void)
 			memset(&d11.counters[j], 0, sizeof(d11.counters[j]));
 		}
 		if (printed)
-			printf("Z: %s\n", line);
+			printf("Z%02d: %s\n", i, line);
 	}
 }
 
-static void maschinen_gang(void)
+static void maschinen_gang(int mc)
 {
 	int u = l.gruppe.u;
 	int h = l.gruppe.h;
@@ -130,10 +135,13 @@ static void maschinen_gang(void)
 			process_carry(target - 1);
 	}
 	/* Print */
-	printf("P: ");
+	printf("M%02d: ", mc);
 	for (i = PRINTER_COUNT; i > 0; i--) {
 		for (j = 1; j <= 11; j++) {
-			printf("%x", d11.printers[i].d[j]);
+			if (d11.kb.postenschreibung[i])
+				printf("%x", d11.printers[i].d[j]);
+			else
+				printf(" ");
 		}
 		printf(" ");
 	}
@@ -179,6 +187,11 @@ static void maschinen_gang(void)
 	}
 	if (d11.gruppe.u || d11.gruppe.h || d11.gruppe.ue)
 		zwischen_gang();
+}
+
+static void kommando_init(void)
+{
+	d11.kb.ep = 1;
 }
 
 static void gruppen_init(void)
@@ -234,11 +247,13 @@ void d11_run(int cards[][80], int card_count, struct connector *connectors, int 
 	memcpy(&d11.high[1], cards[0], 80);
 	for (i = 1; i <= card_count; i++) {
 		int *card = cards[i];
+		kommando_init();
+		do_connectors_kommando();
 		memcpy(&d11.low[1], &d11.high[1], 80);
 		if (i != card_count)
 			memcpy(&d11.high[1], card, 80);
 		else
 			memset(&d11.high[1], 0, 80);
-		maschinen_gang();
+		maschinen_gang(i);
 	}
 }

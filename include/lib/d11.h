@@ -35,8 +35,10 @@ struct d11 {
 	} gruppe;
 	struct {
 		int zwischengang[8 + 1];
-		int summenschreibung[7 + 1];
-		int summenloeschung[7 + 1];
+		int summenschreibung[PRINTER_COUNT + 1];
+		int summenloeschung[PRINTER_COUNT + 1];
+		int postenschreibung[PRINTER_COUNT + 1];
+		int ep; /* Einzelposten */
 	} kb;
 } d11;
 
