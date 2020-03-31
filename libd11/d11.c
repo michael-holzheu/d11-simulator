@@ -21,10 +21,12 @@
 #define PTR_DIFF(x, y) ((unsigned long)(((char *) (x)) - ((unsigned long) (y))))
 
 struct {
-	struct connector *connectors;
-	int count;
-	struct connector *connectors_kommando;
-	int count_kommando;
+	struct connector *connectors_start;
+	int count_start;
+	struct connector *connectors_kartengang;
+	int count_kartengang;
+	struct connector *connectors_zwischengang;
+	int count_zwischengang;
 	struct {
 		int ue;
 		int h;
@@ -35,6 +37,23 @@ struct {
 #define connector_iterate(connectors, ptr, i) \
 	for (i = 0; (ptr = &connectors[i], i < l.count); i++)
 
+static struct connector *connector_find_source_next(void *start, void *end)
+{
+	struct connector *min = NULL;
+	int i;
+
+	for (i = 0; i < l.count_kartengang; i++) {
+		void *source = l.connectors_kartengang[i].source;
+		if (source < start)
+		       continue;
+		if (source > end)
+		       continue;
+		if (min == NULL || source < (void *) min->source)
+			min = &l.connectors_kartengang[i];
+	}
+	return min;
+}
+
 static void process_carry(int *digit) {
 	*digit += 1;
 	if (*digit == 10) {
@@ -43,30 +62,38 @@ static void process_carry(int *digit) {
 	}
 }
 
-static struct connector *connector_find_source_next(void *start, void *end)
+static void do_connectors_kartengang(void)
 {
-	struct connector *min = NULL;
 	int i;
 
-	for (i = 0; i < l.count; i++) {
-		void *source = l.connectors[i].source;
-		if (source < start)
-		       continue;
-		if (source > end)
-		       continue;
-		if (min == NULL || source < (void *) min->source)
-			min = &l.connectors[i];
+	for (i = 0; i < l.count_kartengang; i++) {
+		int *source = l.connectors_kartengang[i].source;
+		int *target = l.connectors_kartengang[i].target;
+		int result = *source + *target;
+		*target = result % 10;
+		if (result >= 10)
+			process_carry(target - 1);
 	}
-	return min;
 }
 
-static void do_connectors_kommando(void)
+static void do_connectors_start(void)
 {
 	int i;
 
-	for (i = 0; i < l.count_kommando; i++) {
-		int *source = l.connectors_kommando[i].source;
-		int *target = l.connectors_kommando[i].target;
+	for (i = 0; i < l.count_start; i++) {
+		int *source = l.connectors_start[i].source;
+		int *target = l.connectors_start[i].target;
+		*target = *source + *target;
+	}
+}
+
+static void do_connectors_zwischengang(void)
+{
+	int i;
+
+	for (i = 0; i < l.count_zwischengang; i++) {
+		int *source = l.connectors_zwischengang[i].source;
+		int *target = l.connectors_zwischengang[i].target;
 		*target = *source + *target;
 	}
 }
@@ -80,17 +107,17 @@ static void zwischen_gang(void)
 	for (i = 9; i > 0; i--) {
 		if (opts.debug)
 			printf("Zwischengang: %d\n", i);
-		memset(&d11.kb, 0, sizeof(d11.kb));
-		d11.kb.zwischengang[i] = 1;
+		memset(&d11.kb.zwischen, 0, sizeof(d11.kb.zwischen));
+		d11.kb.zwischen.gang[i] = 1;
 		/* Process connectors */
-		do_connectors_kommando();
+		do_connectors_zwischengang();
 		/* Summenschreibung */
 		memset(line, 0, sizeof(line));
 		printed = false;
 		ptr = line;
 		for (j = PRINTER_COUNT; j > 0; j--) {
 			for (k = 1; k <= 11; k++) {
-				if (d11.kb.summenschreibung[j]) {
+				if (d11.kb.zwischen.summenschreibung[j]) {
 					printed = true;
 					sprintf(ptr++, "%x", d11.counters[j].d[k]);
 				} else {
@@ -101,7 +128,7 @@ static void zwischen_gang(void)
 		}
 		/* Summenloeschung */
 		for (j = 8; j > 0; j--) {
-			if (!d11.kb.summenloeschung[j])
+			if (!d11.kb.zwischen.summenloeschung[j])
 				continue;
 			if (opts.debug)
 				printf("Loesche counter: %d\n", j);
@@ -126,16 +153,9 @@ static void maschinen_gang(int mc)
 	memset(d11.abriegelung, 0, sizeof(d11.abriegelung));
 
 	/* Process connectors */
-	for (i = 0; i < l.count; i++) {
-		int *source = l.connectors[i].source;
-		int *target = l.connectors[i].target;
-		int result = *source + *target;
-		*target = result % 10;
-		if (result >= 10)
-			process_carry(target - 1);
-	}
+	do_connectors_kartengang();
 	/* Print */
-	printf("M%02d: ", mc);
+	printf("K%02d: ", mc);
 	for (i = PRINTER_COUNT; i > 0; i--) {
 		for (j = 1; j <= 11; j++) {
 			if (d11.kb.postenschreibung[i])
@@ -189,9 +209,9 @@ static void maschinen_gang(int mc)
 		zwischen_gang();
 }
 
-static void kommando_init(void)
+static void start_init(void)
 {
-	d11.kb.ep = 1;
+	d11.schalter.kb.ep = 1;
 }
 
 static void gruppen_init(void)
@@ -225,15 +245,19 @@ static void gruppen_init(void)
 	} while (ptr <= (void *) &d11.abriegelung[20]);
 }
 
-void d11_run(int cards[][80], int card_count, struct connector *connectors, int con_count,
-	     struct connector *connectors_kommando, int con_count_kommando)
+void d11_run(int cards[][80], int card_count,
+	     struct connector *connectors_start, int count_start,
+	     struct connector *connectors_kartengang, int count_kartengang,
+	     struct connector *connectors_zwischengang, int count_zwischengang)
 {
-	int i, j;
+	int i, j, *card;
 
-	l.connectors = connectors;
-	l.count = con_count;
-	l.connectors_kommando = connectors_kommando;
-	l.count_kommando = con_count_kommando;
+	l.connectors_start = connectors_start;
+	l.count_start = count_start;
+	l.connectors_kartengang = connectors_kartengang;
+	l.count_kartengang = count_kartengang;
+	l.connectors_zwischengang = connectors_zwischengang;
+	l.count_zwischengang = count_zwischengang;
 
 	gruppen_init();
 
@@ -245,10 +269,10 @@ void d11_run(int cards[][80], int card_count, struct connector *connectors, int 
 		printf("\n");
 	}
 	memcpy(&d11.high[1], cards[0], 80);
+	start_init();
+	do_connectors_start();
 	for (i = 1; i <= card_count; i++) {
-		int *card = cards[i];
-		kommando_init();
-		do_connectors_kommando();
+		card = cards[i];
 		memcpy(&d11.low[1], &d11.high[1], 80);
 		if (i != card_count)
 			memcpy(&d11.high[1], card, 80);

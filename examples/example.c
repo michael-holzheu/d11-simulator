@@ -12,7 +12,10 @@
 #include "lib/d11.h"
 #include "lib/util_base.h"
 
-struct connector connectors[] = {
+/*
+ * Kartengang
+ */
+struct connector connectors_kartengang[] = {
 	/* Artikel 1-3 */
 	{&d11.low[1],&d11.printers[6].d[9]},
 	{&d11.low[2],&d11.printers[6].d[10]},
@@ -60,19 +63,22 @@ struct connector connectors[] = {
 };
 
 /*
- * Kommandobruecke
+ * Zwischengang
  */
-struct connector connectors_kommando[] = {
+struct connector connectors_zwischengang[] = {
 	/* Summenschreibung */
-	{&d11.kb.zwischengang[2],&d11.kb.summenschreibung[4]},
-	{&d11.kb.zwischengang[2],&d11.kb.summenschreibung[5]},
+	{&d11.kb.zwischen.gang[2],&d11.kb.zwischen.summenschreibung[4]},
+	{&d11.kb.zwischen.gang[2],&d11.kb.zwischen.summenschreibung[5]},
 	/* Summenloeschung */
-	{&d11.kb.zwischengang[1],&d11.kb.summenloeschung[4]},
-	{&d11.kb.zwischengang[1],&d11.kb.summenloeschung[5]},
+	{&d11.kb.zwischen.gang[1],&d11.kb.zwischen.summenloeschung[4]},
+	{&d11.kb.zwischen.gang[1],&d11.kb.zwischen.summenloeschung[5]},
+};
+
+struct connector connectors_start[] = {
 	/* Postenschreibung */
-	{&d11.kb.ep,&d11.kb.postenschreibung[4]},
-	{&d11.kb.ep,&d11.kb.postenschreibung[5]},
-	{&d11.kb.ep,&d11.kb.postenschreibung[6]},
+	{&d11.schalter.kb.ep,&d11.kb.postenschreibung[4]},
+	{&d11.schalter.kb.ep,&d11.kb.postenschreibung[5]},
+	{&d11.schalter.kb.ep,&d11.kb.postenschreibung[6]},
 };
 
 int cards[][80] = {
@@ -90,7 +96,9 @@ int cards[][80] = {
 int main(int argc, char *argv[])
 {
 	d11_init(argc, argv);
-	d11_run(cards, UTIL_ARRAY_SIZE(cards), connectors, UTIL_ARRAY_SIZE(connectors),
-		connectors_kommando, UTIL_ARRAY_SIZE(connectors_kommando));
+	d11_run(cards, UTIL_ARRAY_SIZE(cards),
+		connectors_start, UTIL_ARRAY_SIZE(connectors_start),
+		connectors_kartengang, UTIL_ARRAY_SIZE(connectors_kartengang),
+		connectors_zwischengang, UTIL_ARRAY_SIZE(connectors_zwischengang));
 	return 0;
 }

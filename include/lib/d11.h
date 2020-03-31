@@ -34,12 +34,18 @@ struct d11 {
 		int ue;
 	} gruppe;
 	struct {
-		int zwischengang[8 + 1];
-		int summenschreibung[PRINTER_COUNT + 1];
-		int summenloeschung[PRINTER_COUNT + 1];
+		struct {
+			int gang[8 + 1];
+			int summenschreibung[PRINTER_COUNT + 1];
+			int summenloeschung[PRINTER_COUNT + 1];
+		} zwischen;
 		int postenschreibung[PRINTER_COUNT + 1];
-		int ep; /* Einzelposten */
 	} kb;
+	struct {
+		struct {
+			int ep; /* Einzelposten */
+		} kb;
+	} schalter;
 } d11;
 
 struct connector {
@@ -49,7 +55,9 @@ struct connector {
 
 
 void d11_init(int argc, char *argv[]);
-void d11_run(int cards[][80], int card_count, struct connector *connectors, int con_count,
-	     struct connector *connectors_kommando, int con_count_kommando);
+void d11_run(int cards[][80], int card_count,
+	     struct connector *connectors_start, int count_start,
+	     struct connector *connectors_kartengang, int count_kartengang,
+	     struct connector *connectors_zwischengang, int count_zwischengang);
 
 #endif /* EXAMPLE_H */
